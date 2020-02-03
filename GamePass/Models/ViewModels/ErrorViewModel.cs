@@ -1,6 +1,6 @@
 using System;
 
-namespace GamePass.Models
+namespace GamePass.Models.ViewModels
 {
     public class ErrorViewModel
     {
