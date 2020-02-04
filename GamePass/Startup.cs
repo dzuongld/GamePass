@@ -12,6 +12,8 @@ using GamePass.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using GamePass.Repository.IRepository;
+using GamePass.Repository;
 
 namespace GamePass
 {
@@ -32,6 +34,10 @@ namespace GamePass
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // make unit of work accessible as a dependency
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();
         }
