@@ -8,21 +8,21 @@ using System.Threading.Tasks;
 
 namespace GamePass.Repository
 {
-    public class GenreRepository : Repository<Genre>, IGenreRepository
+    public class PlatformRepository : Repository<Platform>, IPlatformRepository
     {
         private readonly ApplicationDbContext _db;
 
-        public GenreRepository(ApplicationDbContext db) : base(db)
+        public PlatformRepository(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
 
-        public void Update(Genre genre)
+        public void Update(Platform platform)
         {
-            var objDb = _db.Genres.FirstOrDefault(s => s.Id == genre.Id);
+            var objDb = _db.Platforms.FirstOrDefault(s => s.Id == platform.Id);
             if (objDb != null)
             {
-                objDb.Name = genre.Name;
+                objDb.Name = platform.Name;
             }
 
         }

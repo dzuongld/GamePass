@@ -1,0 +1,147 @@
+﻿
+@model GamePass.Models.ViewModels.ProductViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var title = "Create Product";
+}
+
+<form method="post" enctype="multipart/form-data">
+    @* needed for file upload *@
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row p-3 border">
+        @if (Model.Product.Id != 0)
+        {
+            //edit
+            title = "Edit Product";
+            <input type="hidden" asp-for="Product.Id" />
+        }
+        <div class="col-12 border-bottom">
+            <h2 class="text-primary">@title</h2>
+        </div>
+
+        <div class="col-8 pt-4">
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Title"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Title" class="form-control" />
+                    <span asp-validation-for="Product.Title" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Publisher"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Publisher" class="form-control" />
+                    <span asp-validation-for="Product.Publisher" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Description"></label>
+                </div>
+                <div class="col-8">
+                    <textarea asp-for="Product.Description" class="form-control"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    <label asp-for="Product.Price"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="Product.Price" class="form-control" />
+                    <span asp-validation-for="Product.Price" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    Genre
+                </div>
+                <div class="col-8">
+                    @* id, list, default selection, css class *@
+                    @Html.DropDownListFor(m => m.Product.GenreId, Model.GenreList, "--Select Genre--",
+                    new { @class = "form-control" })
+                    <span asp-validation-for="Product.GenreId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    Cover Type
+                </div>
+                <div class="col-8">
+                    @Html.DropDownListFor(m => m.Product.PlatformId, Model.PlatformList, "--Select Platform--",
+                    new { @class = "form-control" })
+                    <span asp-validation-for="Product.PlatformId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-4">
+                    Cover Type
+                </div>
+                <div class="col-8">
+                    <input type="file" name="files" id="uploadBox" multiple class="form-control" />
+                    <span asp-validation-for="Product.PlatformId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-8 offset-4">
+                    @if (Model.Product.Id != 0)
+                    {
+                        //edit
+                        <partial name="_EditAndBackToListButton" model="Model.Product.Id" />
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col">
+                                @* ensure picture is uploaded for new product *@
+                                <button type="submit" onclick="return validateInput()" class="btn btn-primary form-control">Create</button>
+                            </div>
+                            <div class="col">
+                                <a asp-action="Index" class="btn btn-primary form-control">Back To List</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Product.Id != 0)
+        {
+            // display image
+            <div class="col-3 offset-1 pt-4">
+                <img src="@Model.Product.ImageUrl" width="100%" style="border-radius:5px;border: 1px,solid #bbb9b9" />
+            </div>
+        }
+    </div>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+    @* tiny.cloud *@
+    <script src="https://cdn.tiny.cloud/1/1rb3q97pjsutzchm13ummu9jmuddi9c4qa56ad0udy4nji3c/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'lists',
+            menubar: 'file edit format'
+        })
+
+        function validateInput() {
+            if (document.getElementById('uploadBox').value == '') {
+                swal("Error", "Please select an image", "error")
+                return false
+            }
+            return true
+        }
+    </script>
+}
