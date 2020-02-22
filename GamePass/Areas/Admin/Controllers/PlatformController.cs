@@ -6,11 +6,13 @@ using Dapper;
 using GamePass.Models;
 using GamePass.Repository.IRepository;
 using GamePass.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GamePass.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = StaticDetails.Role_Admin)]
     public class PlatformController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

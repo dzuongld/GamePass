@@ -16,12 +16,15 @@ namespace GamePass.Repository
 
         public ISP_Call SP_Call { get; private set; }
 
+        public IApplicationUserRepository ApplicationUser { get; private set; }
+
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
             Genre = new GenreRepository(_db);
             Platform = new PlatformRepository(_db);
             Product = new ProductRepository(_db);
+            ApplicationUser = new ApplicationUserRepository(_db);
             SP_Call = new SP_Call(_db);
         }
 

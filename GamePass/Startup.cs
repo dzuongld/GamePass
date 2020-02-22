@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using GamePass.Repository.IRepository;
 using GamePass.Repository;
+using GamePass.Utility;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace GamePass
 {
@@ -32,14 +34,39 @@ namespace GamePass
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            //email sender
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.Configure<EmailOptions>(Configuration); //map with appsettings
 
             // make unit of work accessible as a dependency
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();
+
+            //authorization
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+
+            //facebook/google login
+            services.AddAuthentication()
+                .AddFacebook(options =>
+                {
+                    options.AppId = Configuration["facebook:AppId"];
+                    options.AppSecret = Configuration["facebook:AppSecret"];
+                })
+                .AddGoogle(options =>
+                {
+                    options.ClientId = Configuration["google:ClientId"];
+                    options.ClientSecret = Configuration["google:ClientSecret"];
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

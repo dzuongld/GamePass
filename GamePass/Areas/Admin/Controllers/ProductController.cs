@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using GamePass.Models;
 using GamePass.Models.ViewModels;
 using GamePass.Repository.IRepository;
+using GamePass.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace GamePass.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = StaticDetails.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
