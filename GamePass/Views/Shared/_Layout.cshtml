@@ -1,4 +1,6 @@
 ﻿@using GamePass.Utility
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 
 <!DOCTYPE html>
 <html lang="en">
@@ -40,6 +42,27 @@
                                     <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
                                     <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">User</a>
                                 </div>
+                            </li>
+                        }
+
+                        @if (HttpContextAccessor.HttpContext.Session.GetInt32(StaticDetails.ssShoppingCart) != null)
+                        {
+                            <li style="color: white">
+                                <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-link">
+                                    @{
+                                        var count = HttpContextAccessor.HttpContext.Session.GetInt32(StaticDetails.ssShoppingCart);
+
+                                    }
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (@count)
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li style="color: white">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-shopping-cart"></i> &nbsp; (0)
+                                </a>
                             </li>
                         }
                     </ul>

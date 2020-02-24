@@ -89,6 +89,7 @@ namespace GamePass.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
 
+            // populate dropdowns
             Input = new InputModel()
             {
                 // admin not registering customer account
@@ -182,6 +183,17 @@ namespace GamePass.Areas.Identity.Pages.Account
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
+            // populate dropdowns
+            Input = new InputModel()
+            {
+                // admin not registering customer account
+                RoleList = _roleManager.Roles.Where(u => u.Name != StaticDetails.Role_Customer).Select(x => x.Name).Select(i => new SelectListItem
+                {
+                    Text = i,
+                    Value = i
+                })
+            };
 
             // If we got this far, something failed, redisplay form
             return Page();

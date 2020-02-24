@@ -18,6 +18,12 @@ namespace GamePass.Repository
 
         public IApplicationUserRepository ApplicationUser { get; private set; }
 
+        public IOrderDetailsRepository OrderDetails { get; private set; }
+
+        public IOrderHeaderRepository OrderHeader { get; private set; }
+
+        public IShoppingCartRepository ShoppingCart { get; private set; }
+
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
@@ -25,6 +31,9 @@ namespace GamePass.Repository
             Platform = new PlatformRepository(_db);
             Product = new ProductRepository(_db);
             ApplicationUser = new ApplicationUserRepository(_db);
+            OrderDetails = new OrderDetailsRepository(_db);
+            OrderHeader = new OrderHeaderRepository(_db);
+            ShoppingCart = new ShoppingCartRepository(_db);
             SP_Call = new SP_Call(_db);
         }
 

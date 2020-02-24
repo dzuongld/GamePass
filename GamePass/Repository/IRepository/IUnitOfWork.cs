@@ -12,6 +12,9 @@ namespace GamePass.Repository.IRepository
         IProductRepository Product { get; }
         IApplicationUserRepository ApplicationUser { get; }
         ISP_Call SP_Call { get; }
+        IOrderDetailsRepository OrderDetails { get; }
+        IOrderHeaderRepository OrderHeader { get; }
+        IShoppingCartRepository ShoppingCart { get; }
         void Save();
     }
 }
