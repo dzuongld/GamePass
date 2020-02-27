@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GamePass.Models;
 using GamePass.Models.ViewModels;
 using GamePass.Repository.IRepository;
+using GamePass.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

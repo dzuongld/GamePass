@@ -22,8 +22,11 @@ namespace GamePass.Models
         public Double OrderTotal { get; set; }
         public string TrackingNumber { get; set; }
         public string Carrier { get; set; }
-        public DateTime PaymentDate { get; set; }
+        public string PaymentStatus { get; set; }
+        public string OrderStatus { get; set; }
         public string TransactionId { get; set; }
+
+        [Required]
         public string Name { get; set; }
         public string Street { get; set; }
         public string City { get; set; }

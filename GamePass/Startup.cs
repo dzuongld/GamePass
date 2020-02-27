@@ -16,6 +16,7 @@ using GamePass.Repository.IRepository;
 using GamePass.Repository;
 using GamePass.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Stripe;
 
 namespace GamePass
 {
@@ -40,6 +41,9 @@ namespace GamePass
             //email sender
             services.AddSingleton<IEmailSender, EmailSender>();
             services.Configure<EmailOptions>(Configuration); //map with appsettings
+
+            //stripe
+            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
 
             // make unit of work accessible as a dependency
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -94,6 +98,9 @@ namespace GamePass
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            //stripe
+            StripeConfiguration.ApiKey = Configuration.GetSection("Stripe")["SecretKey"];
 
             //session
             app.UseSession();

@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using GamePass.Models;
 using GamePass.Models.ViewModels;
 using GamePass.Repository.IRepository;
 using GamePass.Utility;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Stripe;
 
 namespace GamePass.Areas.Customer.Controllers
 {
@@ -23,6 +25,7 @@ namespace GamePass.Areas.Customer.Controllers
         private readonly IEmailSender _emailSender;
         private readonly UserManager<IdentityUser> _userManager;
 
+        [BindProperty] //bind to both view and controller
         public ShoppingCartViewModel ShoppingCartVM { get; set; }
 
         public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, UserManager<IdentityUser> userManager)
@@ -135,5 +138,129 @@ namespace GamePass.Areas.Customer.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult Summary()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            ShoppingCartVM = new ShoppingCartViewModel()
+            {
+                OrderHeader = new Models.OrderHeader(),
+                ListCart = _unitOfWork.ShoppingCart.GetAll(c => c.ApplicationUserId == claim.Value, includeProperties: "Product")
+            };
+
+            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.GetFirstOrDefault(c => c.Id == claim.Value);
+
+            foreach (var list in ShoppingCartVM.ListCart)
+            {
+                list.Price = list.Product.Price;
+                ShoppingCartVM.OrderHeader.OrderTotal += (list.Price * list.Count);
+            }
+
+            ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
+            ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
+            ShoppingCartVM.OrderHeader.Street = ShoppingCartVM.OrderHeader.ApplicationUser.Street;
+            ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
+            ShoppingCartVM.OrderHeader.State = ShoppingCartVM.OrderHeader.ApplicationUser.State;
+            ShoppingCartVM.OrderHeader.Postcode = ShoppingCartVM.OrderHeader.ApplicationUser.Postcode;
+
+            return View(ShoppingCartVM);
+        }
+
+        [HttpPost]
+        [ActionName("Summary")]
+        [ValidateAntiForgeryToken]
+        public IActionResult SummaryPost(string stripeToken)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.GetFirstOrDefault(c => c.Id == claim.Value);
+            ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart.GetAll(c => c.ApplicationUserId == claim.Value, includeProperties: "Product");
+
+            // create and add order
+            ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetails.PaymentStatusPending;
+            ShoppingCartVM.OrderHeader.OrderStatus = StaticDetails.StatusPending;
+            ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
+            ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
+            ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
+
+            _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
+            _unitOfWork.Save();
+
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
+                item.Price = item.Product.Price;
+                OrderDetails orderDetails = new OrderDetails()
+                {
+                    ProductId = item.ProductId,
+                    OrderId = ShoppingCartVM.OrderHeader.Id, //recently created
+                    Price = item.Price,
+                    Count = item.Count
+                };
+                ShoppingCartVM.OrderHeader.OrderTotal += orderDetails.Count * orderDetails.Price;
+                _unitOfWork.OrderDetails.Add(orderDetails);
+            }
+
+            //clear shopping cart
+            _unitOfWork.ShoppingCart.RemoveRange(ShoppingCartVM.ListCart);
+            _unitOfWork.Save();
+            //update session
+            HttpContext.Session.SetInt32(StaticDetails.ssShoppingCart, 0);
+
+            //process payment
+            var options = new ChargeCreateOptions()
+            {
+                Amount = Convert.ToInt32(ShoppingCartVM.OrderHeader.OrderTotal * 100),
+                Currency = "usd",
+                Description = "Order ID: " + ShoppingCartVM.OrderHeader.Id,
+                Source = stripeToken
+            };
+            
+            try
+            {
+                var service = new ChargeService();
+                Charge charge = service.Create(options);
+                ShoppingCartVM.OrderHeader.TransactionId = charge.BalanceTransactionId;
+                
+                if (charge.Status.ToLower() == "succeeded")
+                {
+                    ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetails.PaymentStatusApproved;
+                    ShoppingCartVM.OrderHeader.OrderStatus = StaticDetails.StatusApproved;
+                }
+                else if (charge.Status.ToLower() == "failed" || charge.BalanceTransactionId == null)
+                {
+                    return OrderFailedHelper();
+                }
+            }
+            catch (Exception)
+            {
+                return OrderFailedHelper();
+            }
+                        
+            _unitOfWork.Save();
+
+            return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
+        }
+
+        public IActionResult OrderConfirmation(int id)
+        {
+            return View(id);
+        }
+
+        public IActionResult OrderFailed(int id)
+        {
+            return View(id);
+        }
+
+        public IActionResult OrderFailedHelper()
+        {
+            ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetails.PaymentStatusRejected;
+            ShoppingCartVM.OrderHeader.OrderStatus = StaticDetails.StatusPending;
+            _unitOfWork.Save();
+            return RedirectToAction("OrderFailed", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
+        }
+
     }
 }

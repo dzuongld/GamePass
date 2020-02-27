@@ -18,6 +18,20 @@ namespace GamePass.Utility
         public const string Role_Customer = "Customer";
         public const string Role_Admin = "Admin";
 
+        // order status
+        public const string StatusPending = "Pending";
+        public const string StatusApproved = "Approved";
+        public const string StatusInProgress = "Processing";
+        public const string StatusShipped = "Shipped";
+        public const string StatusCancelled = "Cancelled";
+        public const string StatusRefunded = "Refunded";
+
+        // payment status
+        public const string PaymentStatusApproved = "Approved";
+        public const string PaymentStatusRejected = "Rejected";
+        public const string PaymentStatusPending = "Pending";
+
+
         public const string ssShoppingCart = "Shopping Cart Session";
         
         public static string ConvertToRawHtml(string source)
