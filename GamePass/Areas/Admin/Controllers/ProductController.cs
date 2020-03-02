@@ -30,14 +30,15 @@ namespace GamePass.Areas.Admin.Controllers
         {
             return View();
         }
-        public IActionResult Upsert(int? id)
+        public async Task<IActionResult> Upsert(int? id)
         {
+            IEnumerable<Genre> GenreList = await _unitOfWork.Genre.GetAllAsync();
             ProductViewModel productVM = new ProductViewModel()
             {
                 Product = new Product(),
 
                 // convert to a select list
-                GenreList = _unitOfWork.Genre.GetAll().Select(i => new SelectListItem
+                GenreList = GenreList.Select(i => new SelectListItem
                 {
                     Text = i.Name,
                     Value = i.Id.ToString()
@@ -66,7 +67,7 @@ namespace GamePass.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Upsert(ProductViewModel productVM)
+        public async Task<IActionResult> Upsert(ProductViewModel productVM)
         {
             if (ModelState.IsValid)
             {
@@ -120,7 +121,8 @@ namespace GamePass.Areas.Admin.Controllers
             }
             else
             {
-                productVM.GenreList = _unitOfWork.Genre.GetAll().Select(i => new SelectListItem
+                IEnumerable<Genre> GenreList = await _unitOfWork.Genre.GetAllAsync();
+                productVM.GenreList = GenreList.Select(i => new SelectListItem
                 {
                     Text = i.Name,
                     Value = i.Id.ToString()

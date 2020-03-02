@@ -17,6 +17,7 @@ using GamePass.Repository;
 using GamePass.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace GamePass
 {
@@ -41,6 +42,9 @@ namespace GamePass
             //email sender
             services.AddSingleton<IEmailSender, EmailSender>();
             services.Configure<EmailOptions>(Configuration); //map with appsettings
+
+            //temp data
+            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
 
             //stripe
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GamePass.Repository
 {
-    public class GenreRepository : Repository<Genre>, IGenreRepository
+    public class GenreRepository : RepositoryAsync<Genre>, IGenreRepository
     {
         private readonly ApplicationDbContext _db;
 

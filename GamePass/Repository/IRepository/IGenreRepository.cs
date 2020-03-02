@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GamePass.Repository.IRepository
 {
-    public interface IGenreRepository : IRepository<Genre>
+    public interface IGenreRepository : IRepositoryAsync<Genre>
     {
         void Update(Genre genre);
     }
