@@ -22,6 +22,11 @@ namespace GamePass.Repository
             var objDb = _db.Products.FirstOrDefault(s => s.Id == product.Id);
             if (objDb != null)
             {
+                if (product.ImageUrl != null)
+                {
+                    objDb.ImageUrl = product.ImageUrl;
+                }
+
                 objDb.Title = product.Title;
                 objDb.Price = product.Price;
                 objDb.Description = product.Description;

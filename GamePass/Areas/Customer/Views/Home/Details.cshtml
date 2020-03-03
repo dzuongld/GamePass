@@ -1,4 +1,5 @@
 ﻿@model GamePass.Models.ShoppingCart
+@using GamePass.Utility
 
 <form method="post">
     <input hidden asp-for="ProductId" />
@@ -45,7 +46,7 @@
                     </div>
                     <div class="col-12 col-md-6 pb-1">
 
-                        <button type="submit" value="Add to Cart" class="btn btn-primary btn-square btn-lg form-control" style="height:50px;">Add to Cart</button>
+                        <button disabled="@User.IsInRole(StaticDetails.Role_Admin)" type="submit" value="Add to Cart" class="btn btn-primary btn-square btn-lg form-control" style="height:50px;">Add to Cart</button>
 
                     </div>
                 </div>
