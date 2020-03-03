@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+GamePass/appsettings.Production.json
+GamePass/appsettings.Development.json

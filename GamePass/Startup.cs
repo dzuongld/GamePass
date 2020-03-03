@@ -18,6 +18,7 @@ using GamePass.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using GamePass.Initializer;
 
 namespace GamePass
 {
@@ -52,6 +53,9 @@ namespace GamePass
             // make unit of work accessible as a dependency
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            //db initializer
+            services.AddScoped<IDbInitializer, DbInitializer>();
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();
 
@@ -85,7 +89,7 @@ namespace GamePass
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDbInitializer dbInitializer)
         {
             if (env.IsDevelopment())
             {
@@ -111,6 +115,9 @@ namespace GamePass
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // db initializer
+            dbInitializer.Initialize();
 
             app.UseEndpoints(endpoints =>
             {
